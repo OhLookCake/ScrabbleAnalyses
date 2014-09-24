@@ -1,0 +1,8 @@
+*.Rproj
+.Rproj.user
+.Rproj.user/*
+
+.RData
+.Rhistory
+
+data/anno*.gcg
