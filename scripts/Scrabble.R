@@ -16,8 +16,8 @@ CategorizeMoves <- function(cleanGcg){
     if(grepl("^\\(challenge\\)", move)) { type <- "challengebonus"}
     if(grepl("^\\(time\\)", move)) { type <- "timepenalty"}
     if(grepl("^\\([A-Z\\?]\\)*", move)) { type <- "leave"}
-    if(grepl("^[0-9]+[A-O]+", move)) { type <- "h"}
-    if(grepl("^[A-O]+[0-9]+", move)) { type <- "v"}
+    if(grepl("^[0-9]+[A-Oa-o]+", move)) { type <- "h"}
+    if(grepl("^[A-Oa-o]+[0-9]+", move)) { type <- "v"}
     type
   })
   
@@ -31,27 +31,40 @@ CategorizeMoves <- function(cleanGcg){
 
 MakeBoard <- function(gcg){
   
+  #Initialize empty board
+  board <- matrix(data=".", nrow=15, ncol=15)
+  
   #Clean up comments, meta data
   gcg <- gcg[-c(grep("^#", gcg), grep("^[\\ ]*$", gcg))]
+  gcg <- gcg[grep("^>", gcg)]
+  gcg <- gsub("#.*$", "", gcg)
+  
   #Remove player names and rack
-  cleanGcg <- gsub("^.*\\:\\ [A-Z\\?]*\\ ", "", gcg)
+  cleanGcg <- gsub("^[[:alnum:][:punct:]]*\\:\\ [A-Z\\?]*[\\ ]*", "", gcg)
+  
+  #if No game details found, return blank board
+  if(length(cleanGcg)==0) { return(board) } # this statement need to be done twice because CategorizeMoves() also throws an error is empty
+  
   types <- CategorizeMoves(cleanGcg)
   
   cleanGcg <- cleanGcg[types=="h" | types=="v"]
   types <- types[types=="h" | types=="v"]
   
-  
-  #Initialize empty board
-  board <- matrix(data=".", nrow=15, ncol=15)
+  if(length(cleanGcg)==0) { return(board) }
+    
   
   #iterate over valid moves one by one, and update the board
   for(i in 1:length(cleanGcg)){
+    print(i)
     move <- cleanGcg[i]
     direction <- types[i]
-    word <- gsub("\\ .*$", "", gsub("^[0-9A-O]*\\ ", "", move))
+    word <- gsub("\\ .*$", "", gsub("^[0-9A-Oa-o]*\\ ", "", move))
     location <- gsub("\\ .*$", "", move)
-    row <- as.numeric(gsub("[A-O]", "", location))
+    row <- as.numeric(gsub("[A-Oa-o]", "", location))
     col <- as.numeric(which(LETTERS == gsub("[0-9]", "", location)))
+    if(length(col)==0) {
+      col <- as.numeric(which(letters == gsub("[0-9]", "", location)))
+    }
       
     for(l in strsplit(word,"")[[1]]){
       if(l!="."){
