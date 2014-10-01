@@ -55,7 +55,6 @@ MakeBoard <- function(gcg){
   
   #iterate over valid moves one by one, and update the board
   for(i in 1:length(cleanGcg)){
-    print(i)
     move <- cleanGcg[i]
     direction <- types[i]
     word <- gsub("\\ .*$", "", gsub("^[0-9A-Oa-o]*\\ ", "", move))
