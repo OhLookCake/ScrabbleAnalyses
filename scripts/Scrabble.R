@@ -9,7 +9,7 @@ PrintBoard <- function(board, sep="")
 
 CategorizeMoves <- function(cleanGcg){
   types <- sapply(cleanGcg, function(move){
-      
+    type="unknown"  
     if(grepl("^-[A-Z\\?]+", move)) { type <- "exchange"}
     if(grepl("^-\\ ", move)) { type <- "pass"}
     if(grepl("^--", move)) { type <- "successfulchallenge"}
