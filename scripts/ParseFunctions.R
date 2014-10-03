@@ -42,14 +42,20 @@ PlaysList <- function(gcg){
   types <- types[types=="h" | types=="v"]
   
   if(length(gcg)==0) { return(NULL) }
+  
   dfMoves <- ldply(strsplit(gcg, split=" "))
-  dfMoves$Player <- gsub("^>", "", gsub("\\:$","", dfMoves$Player))
   dfMoves <- cbind(dfMoves, types)
   rownames(dfMoves) <- NULL
   colnames(dfMoves) <- c("Player", "Rack", "Start", "Word", "Score", "Cumulative", "Direction")
   
-  dfMoves$StartRow <- gsub("[A-Oa-o]*", "", dfMoves$Start)
-  dfMoves$StartCol <- gsub("[0-9]*",    "", dfMoves$Start)
+  dfMoves$Player <- gsub("^>", "", gsub("\\:$","", dfMoves$Player))
+  dfMoves$Score <- as.numeric(dfMoves$Score)
+  dfMoves$Cumulative <- as.numeric(dfMoves$Cumulative)
+  
+  dfMoves$StartRow <- as.numeric(gsub("[A-Oa-o]*", "", dfMoves$Start))
+  dfMoves$StartCol <- sapply(gsub("[0-9]*",    "", dfMoves$Start),
+                             function(x) as.numeric(which(LETTERS == toupper(x)))
+                             )
   
   return(dfMoves)
   
