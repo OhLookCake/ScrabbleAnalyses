@@ -8,12 +8,10 @@ PrintBoard <- function(board, sep=" "){
   }
 }
 
-MakeBoard <- function(gcg){
+MakeBoard <- function(dfMoves){
   
   #Initialize empty board
   board <- matrix(data=".", nrow=15, ncol=15)
-  
-  dfMoves <- PlaysList(gcg)
   
   for(i in 1:nrow(dfMoves)){
             

@@ -24,7 +24,9 @@ CategorizeMoves <- function(cleanGcg){
 
 
 
-PlaysList <- function(gcg){
+PlaysList <- function(gcg, derivative=TRUE){
+  #derivative:  Bool. Whether we need secondary/derivative information, 
+  #             like wordlength, bingo, etc.
   
   #Clean up comments, meta data
   gcg <- gcg[-c(grep("^#", gcg), grep("^[\\ ]*$", gcg))]
@@ -58,11 +60,58 @@ PlaysList <- function(gcg){
                              )
   
   
-  #Secondary/Derivative Information:
-  dfMoves$NumLetters <- nchar(gsub("\\.", "", dfMoves$Word))
-  dfMoves$Bingo <- dfMoves$NumLetters==7
-  
+  if(derivative){
+    #Secondary/Derivative Information:
+    dfMoves$NumLetters <- nchar(gsub("\\.", "", dfMoves$Word))
+    dfMoves$Bingo <- dfMoves$NumLetters==7
+  }
   
   return(dfMoves)
   
 }
+
+
+
+
+LoadBoards <- function(sampleFraction = 0.1, derivative=TRUE){
+  # Use sampleFraction to use only a fraction of the boards
+  
+  allFiles <- list.files("data","anno.*\\.gcg")
+  
+  
+  filelist <- sample(allFiles, length(allFiles) * sampleFraction, replace=FALSE)
+  ctr <- 1
+  
+  listdfMoves <- lapply(filelist, function(gcgFileName){
+    cat(" ", ctr," ", gcgFileName,"...\t")
+    dfMoves <- tryCatch({
+      gcgFileName <- paste("data", gcgFileName, sep ="/")
+      gcg <- readLines(gcgFileName)
+      
+      dfMoves <- PlaysList(gcg, derivative=derivative)
+      cat("Done\n") 
+      dfMoves
+    },
+    error=function(e) {
+      cat("Failed\n")
+      NULL
+    }
+    )
+    ctr <<- ctr + 1
+    dfMoves 
+  })
+  
+  
+  numFailed <- sum(sapply(listdfMoves, is.null))
+  listdfMoves <- listdfMoves[!sapply(listdfMoves, is.null)]
+  numSuccessful <- length(listdfMoves)
+  cat("\n", numSuccessful, "\tSuccessful\n", numFailed, "\t\t\tFailed\n\n")
+  
+  return(listdfMoves)
+}
+
+
+
+
+
+
