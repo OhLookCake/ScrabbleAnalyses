@@ -2,9 +2,12 @@
 library(reshape2)
 library(ggplot2)
 library(RColorBrewer)
+library(Hmisc)
 
 setwd("C:/Projects/Data/_Ongoing/Scrabble")
-source("scripts/Scrabble.R")
+
+source("scripts/ParseFunctions.R")
+source("scripts/BoardFunctions.R")
 
 #Initialize empty board
 countBoard <- matrix(data=0, nrow=15, ncol=15)
@@ -27,12 +30,16 @@ for(gcgFileName in sample(allFiles, length(allFiles) * sampleFraction, replace=F
     })
 }
 
+(numSuccessful <- countBoard[8,8])
+(numFailed <- ctr - numSuccessful)
+
 countBoard.long <- melt(countBoard, varnames=c("y","x"), value.name="count")
+countBoard.long$PercentGames <- countBoard.long$count*100/numSuccessful
 
 
 #Plot the board on screen
 boardHeatMap <- ggplot(countBoard.long,
-                       aes(x = LETTERS[x], y = 16-y, fill = count)) +
+                       aes(x = LETTERS[x], y = 16-y, fill = PercentGames)) +
                        geom_tile()
 boardHeatMap <- boardHeatMap +
                   coord_equal() +
