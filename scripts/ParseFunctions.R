@@ -57,6 +57,12 @@ PlaysList <- function(gcg){
                              function(x) as.numeric(which(LETTERS == toupper(x)))
                              )
   
+  
+  #Secondary/Derivative Information:
+  dfMoves$NumLetters <- nchar(gsub("\\.", "", dfMoves$Word))
+  dfMoves$Bingo <- dfMoves$NumLetters==7
+  
+  
   return(dfMoves)
   
 }
