@@ -3,27 +3,11 @@ library(Hmisc)
 source("scripts/Scrabble.R")
 CountBingos <- function(gcg){
   
-  #Clean up comments, meta data
-  gcg <- gcg[-c(grep("^#", gcg), grep("^[\\ ]*$", gcg))]
-  gcg <- gcg[grep("^>", gcg)]
-  gcg <- gsub("#.*$", "", gcg)
-  
-  cleanGcg <- gsub("^[[:alnum:][:punct:]]*\\:\\ [A-Z\\?]*[\\ ]*", "", gcg)
-  
-  #if No game details found, return NULL
-  if(length(cleanGcg)==0) { return(NULL) } # this statement need to be done twice because CategorizeMoves() also throws an error is empty
-  
-  players <- unique(gsub("\\ .+$", "", gcg))
-    
-  #Use only valid moves
-  types <- CategorizeMoves(cleanGcg)
-  gcg <- gcg[types=="h" | types=="v"]
-  #types <- types[types=="h" | types=="v"]
-  
-  if(length(gcg)==0) { return(NULL) }
+  dfMoves <- PlaysList(gcg)
+  players <- unique(dfMoves$Player)
   bingoCount <- c(0,0)
   
-  for(move in gcg){
+  for(i in 1:nrow(dfMoves)){
     player <- gsub("\\ .+$", "", move)
     word <- gsub("\\ .*$", "", 
                  gsub("^[[:alnum:][:punct:]]*\\ [A-Z\\?]*\\ [0-9A-Oa-o]*\\ ", "", move)
@@ -52,13 +36,13 @@ for(gcgFileName in sample(allFiles, length(allFiles) * sampleFraction, replace=F
 try(
 {
   cat(" ", ctr," ")
-  cat(gcgFileName) 
+  cat(gcgFileName, "\n") 
   gcgFileName <- paste("data", gcgFileName, sep ="/")
   
   gcg <- readLines(gcgFileName)
   gcg <- iconv(gcg, to="ASCII//TRANSLIT")
   bingoCounter <- rbind(bingoCounter, sort(CountBingos(gcg)))
-  cat(gcgFileName, "\n") 
+  
   inc(ctr) <- 1
 })
 }
